@@ -41,4 +41,33 @@ class TargetTest extends PHPUnit_Framework_TestCase
         $target->setHits();
         $this->assertEquals([], $target->getHits());
     }
+
+    /**
+     * Test if draw is callable.
+     */
+    public function testDrawTarget()
+    {
+        $target = new Target(0.5, 0.5, 2.5, 4, 10);
+        $target->addHit(new Hit(0, 0, null, '#123456'));
+        $target->addHit(new Hit(500, 500));
+        $target->addHit(new Hit(-500, 500));
+        $target->addHit(new Hit(500, -500));
+        $target->addHit(new Hit(-500, -500));
+
+        ob_start();
+        $target->draw();
+        $pictureString = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertGreaterThanOrEqual(3318000, strlen($pictureString));
+        $this->assertLessThanOrEqual(3319000, strlen($pictureString));
+
+        ob_start();
+        $target->draw(20, Target::DRAW_TYPE_GIF);
+        ob_end_clean();
+
+        ob_start();
+        $target->draw(20, Target::DRAW_TYPE_JPEG);
+        ob_end_clean();
+    }
 }
