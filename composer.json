@@ -1,0 +1,42 @@
+{
+    "name": "patrickbussmann/shooting-target",
+    "description": "Draw shooting targets with hits based on coordinate system",
+    "keywords": [
+        "shooting",
+        "target",
+        "draw",
+        "drawing",
+        "hit",
+        "hits",
+        "gun",
+        "weapon",
+        "shoot",
+        "shot",
+        "shooting-sport",
+        "air-gun",
+        "air-rifle",
+        "air-pistol",
+        "goal",
+        "aim"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Patrick Bußmann",
+            "email": "patrick.bussmann@bussmann-it.de"
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": ">=5.4",
+        "ext-gd": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "5.2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "ShootingTarget\\": "src/"
+        }
+    }
+}
