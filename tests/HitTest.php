@@ -14,7 +14,7 @@ class HitTest extends PHPUnit_Framework_TestCase
     public function testHit()
     {
         $hit = new Hit(730, 132, 'Test', '#123ABC');
-        $this->assertInstanceOf(Hit::class, $hit);
+        $this->assertInstanceOf('ShootingTarget\\Hit', $hit);
         $this->assertEquals(730, $hit->getX());
         $this->assertEquals(132, $hit->getY());
         $this->assertEquals('Test', $hit->getLabel());

@@ -15,7 +15,7 @@ class TargetTest extends PHPUnit_Framework_TestCase
     public function testTargetConstruction()
     {
         $target = new Target();
-        $this->assertInstanceOf(Target::class, $target);
+        $this->assertInstanceOf('ShootingTarget\\Target', $target);
     }
 
     /**
