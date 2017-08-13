@@ -15,8 +15,13 @@ class TargetTest extends PHPUnit_Framework_TestCase
      */
     public function testTargetConstruction()
     {
-        $target = new Target();
+        $hit = new Hit(10, 20);
+        $target = new Target(1, 2, 3, 4, 5, [$hit]);
         $this->assertInstanceOf('ShootingTarget\\Target', $target);
+        foreach ($target->getHits() as $hit) {
+            $this->assertEquals(10, $hit->getX());
+            $this->assertEquals(20, $hit->getY());
+        }
     }
 
     /**
