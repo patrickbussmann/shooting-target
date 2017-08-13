@@ -34,18 +34,32 @@ class Target
     private $ringSpacing;
 
     /**
+     * @var integer the number of first inner / black ring
+     */
+    private $firstInnerRing;
+
+    /**
+     * @var integer the number of ring
+     */
+    private $ringCount;
+
+    /**
      * Target constructor.
      *
      * @param float $diameter10
      * @param float|null $diameterInner10
      * @param float $ringSpacing
+     * @param int $firstInnerRing
+     * @param int $ringCount
      * @param Hit[] $hits
      */
-    public function __construct($diameter10 = 0.5, $diameterInner10 = 0.5, $ringSpacing = 2.5, $hits = [])
+    public function __construct($diameter10 = 0.5, $diameterInner10 = 0.5, $ringSpacing = 2.5, $firstInnerRing = 4, $ringCount = 10, $hits = [])
     {
         $this->diameter10 = $diameter10;
         $this->diameterInner10 = $diameterInner10;
         $this->ringSpacing = $ringSpacing;
+        $this->firstInnerRing = $firstInnerRing;
+        $this->ringCount = $ringCount;
         $this->setHits($hits);
     }
 
@@ -73,7 +87,7 @@ class Target
      */
     public function draw($unit = 20, $type = self::DRAW_TYPE_PNG, $font = 5, $filename = null, $quality = null, $filters = null)
     {
-        $size = (0.25 + (9 * $this->ringSpacing)) * 2 * $unit;
+        $size = (($this->diameter10 / 2) + (($this->ringCount - 1) * $this->ringSpacing)) * 2 * $unit;
         $image = imagecreatetruecolor($size, $size);
 
         $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
@@ -87,17 +101,17 @@ class Target
         /**
          * Rings
          */
-        for($x = 9; $x > 0; $x--)
+        for($x = $this->ringCount - 1; $x >= 0; $x--)
         {
-            $diameter = (($x * $this->ringSpacing * 2) + 0.5) * $unit;
+            $diameter = (($x * $this->ringSpacing * 2) + $this->diameter10) * $unit;
 
-            imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $x > 6 ? $black : $white);
-            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 3, $diameter - 3, $x > 6 ? $white : $black);
+            imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $x > ($this->ringCount - $this->firstInnerRing) ? $black : $white);
+            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 3, $diameter - 3, $x > ($this->ringCount - $this->firstInnerRing) ? $white : $black);
 
-            if(10 - $x < 9)
+            if($this->ringCount - $x < 9)
             {
-                $text = 10 - $x;
-                $color = $x > 6 ? $black : $white;
+                $text = $this->ringCount - $x;
+                $color = $x > ($this->ringCount - $this->firstInnerRing) ? $black : $white;
 
                 if(is_numeric($font))
                 {
@@ -105,13 +119,13 @@ class Target
                     $height = imagefontheight($font) / 2;
 
                     /** Text left */
-                    imagestring($image, $font, $size / 2 - $width - ($diameter / 2) + $unit * 1.25, $size / 2 - $height, $text, $color);
+                    imagestring($image, $font, $size / 2 - $width - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $size / 2 - $height, $text, $color);
                     /** Text right */
-                    imagestring($image, $font, $size / 2 - $width + ($diameter / 2) - $unit * 1.25, $size / 2 - $height, $text, $color);
+                    imagestring($image, $font, $size / 2 - $width + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $size / 2 - $height, $text, $color);
                     /** Text top */
-                    imagestring($image, $font, $size / 2 - $width, $size / 2 - $height - ($diameter / 2) + $unit * 1.25, $text, $color);
+                    imagestring($image, $font, $size / 2 - $width, $size / 2 - $height - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $text, $color);
                     /** Text bottom */
-                    imagestring($image, $font, $size / 2 - $width, $size / 2 - $height + ($diameter / 2) - $unit * 1.25, $text, $color);
+                    imagestring($image, $font, $size / 2 - $width, $size / 2 - $height + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $text, $color);
                 }
                 else
                 {
@@ -120,13 +134,13 @@ class Target
                     $height = ($bBox[1] - $bBox[7]) / 2;
 
                     /** Text left */
-                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width - ($diameter / 2) + $unit * 1.25, $size / 2 + $height, $color, $font, $text);
+                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $size / 2 + $height, $color, $font, $text);
                     /** Text right */
-                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width + ($diameter / 2) - $unit * 1.25, $size / 2 + $height, $color, $font, $text);
+                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $size / 2 + $height, $color, $font, $text);
                     /** Text top */
-                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width, $size / 2 + $height - ($diameter / 2) + $unit * 1.25, $color, $font, $text);
+                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width, $size / 2 + $height - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $color, $font, $text);
                     /** Text bottom */
-                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width, $size / 2 + $height + ($diameter / 2) - $unit * 1.25, $color, $font, $text);
+                    imagettftext($image, $unit * 1.25, 0, $size / 2 - $width, $size / 2 + $height + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $color, $font, $text);
                 }
             }
         }
@@ -134,14 +148,18 @@ class Target
         /**
          * Inner 10
          */
-        $diameter = 0.25 * 2 * $unit;
+        $diameter = ($this->diameterInner10 / 2) * 2 * $unit;
         imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $white);
+        if(($this->diameterInner10 / 2) * 2 >= 3)
+        {
+            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 2, $diameter - 2, $black);
+        }
 
         foreach($this->hits as $number => $hit)
         {
             $x = $hit->getX() * 0.01 * $unit;
             $y = $hit->getY() * 0.01 * $unit;
-            $text = $hit->getLabel() ?: ($number + 1 . '.');
+            $text = $hit->getLabel() ?: ($number + 1);
             $color = $hit->getColor() !== null ? $this->hexColorAllocate($image, $hit->getColor()) : $red;
             $rgbColor = $this->hexColorToRGB($hit->getColor());
             $borderColor = $white;
