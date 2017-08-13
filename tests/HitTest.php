@@ -3,13 +3,14 @@
 use ShootingTarget\Hit;
 
 /**
- * Class HitTest
+ * Class HitTest.
+ *
  * @author Patrick Bußmann <patrick.bussmann@bussmann-it.de>
  */
 class HitTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * Test the hit itself
+     * Test the hit itself.
      */
     public function testHit()
     {

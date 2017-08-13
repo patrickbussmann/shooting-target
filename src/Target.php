@@ -3,8 +3,8 @@
 namespace ShootingTarget;
 
 /**
- * Class Target
- * @package ShootingTarget
+ * Class Target.
+ *
  * @author Patrick Bußmann <patrick.bussmann@bussmann-it.de>
  */
 class Target
@@ -34,24 +34,24 @@ class Target
     private $ringSpacing;
 
     /**
-     * @var integer the number of first inner / black ring
+     * @var int the number of first inner / black ring
      */
     private $firstInnerRing;
 
     /**
-     * @var integer the number of ring
+     * @var int the number of ring
      */
     private $ringCount;
 
     /**
      * Target constructor.
      *
-     * @param float $diameter10
+     * @param float      $diameter10
      * @param float|null $diameterInner10
-     * @param float $ringSpacing
-     * @param int $firstInnerRing
-     * @param int $ringCount
-     * @param Hit[] $hits
+     * @param float      $ringSpacing
+     * @param int        $firstInnerRing
+     * @param int        $ringCount
+     * @param Hit[]      $hits
      */
     public function __construct($diameter10 = 0.5, $diameterInner10 = 0.5, $ringSpacing = 2.5, $firstInnerRing = 4, $ringCount = 10, $hits = [])
     {
@@ -64,24 +64,24 @@ class Target
     }
 
     /**
-     * Draws this target
+     * Draws this target.
      *
-     * @param int $unit the unit of the calculation conversion
-     * @param string $type the type of output: PNG, JPEG, GIF
-     * @param int|string $font numeric font is for default fonts and string as font is a TrueType font file path
-     * @param string $filename [optional] <p>
-     * The path to save the file to. If not set or &null;, the raw image stream
-     * will be outputted directly.</p>
-     * <p>&null; is invalid if the quality and
-     * filters arguments are not used.</p>
-     * @param int $quality [optional] <p>
-     * Compression level: from 0 (no compression) to 9.</p>
-     * @param int $filters [optional] <p>
-     * Allows reducing the PNG file size. It is a bitmask field which may be
-     * set to any combination of the PNG_FILTER_XXX
-     * constants. PNG_NO_FILTER or
-     * PNG_ALL_FILTERS may also be used to respectively
-     * disable or activate all filters.</p>
+     * @param int        $unit     the unit of the calculation conversion
+     * @param string     $type     the type of output: PNG, JPEG, GIF
+     * @param int|string $font     numeric font is for default fonts and string as font is a TrueType font file path
+     * @param string     $filename [optional] <p>
+     *                             The path to save the file to. If not set or &null;, the raw image stream
+     *                             will be outputted directly.</p>
+     *                             <p>&null; is invalid if the quality and
+     *                             filters arguments are not used.</p>
+     * @param int        $quality  [optional] <p>
+     *                             Compression level: from 0 (no compression) to 9.</p>
+     * @param int        $filters  [optional] <p>
+     *                             Allows reducing the PNG file size. It is a bitmask field which may be
+     *                             set to any combination of the PNG_FILTER_XXX
+     *                             constants. PNG_NO_FILTER or
+     *                             PNG_ALL_FILTERS may also be used to respectively
+     *                             disable or activate all filters.</p>
      *
      * @return bool true on success or false on failure
      */
@@ -98,65 +98,58 @@ class Target
         $white = imagecolorallocate($image, 255, 255, 255);
         $red = imagecolorallocate($image, 255, 0, 0);
 
-        /**
+        /*
          * Rings
          */
-        for($x = $this->ringCount - 1; $x >= 0; $x--)
-        {
+        for ($x = $this->ringCount - 1; $x >= 0; $x--) {
             $diameter = (($x * $this->ringSpacing * 2) + $this->diameter10) * $unit;
 
             imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $x > ($this->ringCount - $this->firstInnerRing) ? $black : $white);
             imagefilledellipse($image, $size / 2, $size / 2, $diameter - 3, $diameter - 3, $x > ($this->ringCount - $this->firstInnerRing) ? $white : $black);
 
-            if($this->ringCount - $x < 9)
-            {
+            if ($this->ringCount - $x < 9) {
                 $text = $this->ringCount - $x;
                 $color = $x > ($this->ringCount - $this->firstInnerRing) ? $black : $white;
 
-                if(is_numeric($font))
-                {
+                if (is_numeric($font)) {
                     $width = (imagefontwidth($font) * strlen($text)) / 2;
                     $height = imagefontheight($font) / 2;
 
-                    /** Text left */
+                    /* Text left */
                     imagestring($image, $font, $size / 2 - $width - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $size / 2 - $height, $text, $color);
-                    /** Text right */
+                    /* Text right */
                     imagestring($image, $font, $size / 2 - $width + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $size / 2 - $height, $text, $color);
-                    /** Text top */
+                    /* Text top */
                     imagestring($image, $font, $size / 2 - $width, $size / 2 - $height - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $text, $color);
-                    /** Text bottom */
+                    /* Text bottom */
                     imagestring($image, $font, $size / 2 - $width, $size / 2 - $height + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $text, $color);
-                }
-                else
-                {
+                } else {
                     $bBox = imagettfbbox($unit * 1.25, 0, $font, 10 - $x);
                     $width = ($bBox[2] - $bBox[0]) / 2;
                     $height = ($bBox[1] - $bBox[7]) / 2;
 
-                    /** Text left */
+                    /* Text left */
                     imagettftext($image, $unit * 1.25, 0, $size / 2 - $width - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $size / 2 + $height, $color, $font, $text);
-                    /** Text right */
+                    /* Text right */
                     imagettftext($image, $unit * 1.25, 0, $size / 2 - $width + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $size / 2 + $height, $color, $font, $text);
-                    /** Text top */
+                    /* Text top */
                     imagettftext($image, $unit * 1.25, 0, $size / 2 - $width, $size / 2 + $height - ($diameter / 2) + $unit * ($this->ringSpacing / 2), $color, $font, $text);
-                    /** Text bottom */
+                    /* Text bottom */
                     imagettftext($image, $unit * 1.25, 0, $size / 2 - $width, $size / 2 + $height + ($diameter / 2) - $unit * ($this->ringSpacing / 2), $color, $font, $text);
                 }
             }
         }
 
         /**
-         * Inner 10
+         * Inner 10.
          */
         $diameter = ($this->diameterInner10 / 2) * 2 * $unit;
         imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $white);
-        if(($this->diameterInner10 / 2) * 2 >= 3)
-        {
+        if (($this->diameterInner10 / 2) * 2 >= 3) {
             imagefilledellipse($image, $size / 2, $size / 2, $diameter - 2, $diameter - 2, $black);
         }
 
-        foreach($this->hits as $number => $hit)
-        {
+        foreach ($this->hits as $number => $hit) {
             $x = $hit->getX() * 0.01 * $unit;
             $y = $hit->getY() * 0.01 * $unit;
             $text = $hit->getLabel() ?: ($number + 1);
@@ -167,15 +160,12 @@ class Target
             imagefilledellipse($image, $size / 2 + $x, $size / 2 - $y, 4.5 * $unit, 4.5 * $unit, $borderColor);
             imagefilledellipse($image, $size / 2 + $x, $size / 2 - $y, 4.5 * $unit - 3, 4.5 * $unit - 3, $color);
 
-            if(is_numeric($font))
-            {
+            if (is_numeric($font)) {
                 $width = (imagefontwidth($font) * strlen($text)) / 2;
                 $height = imagefontheight($font) / 2;
 
                 imagestring($image, $font, $size / 2 + $x - $width, $size / 2 - $y - $height, $text, $rgbColor[3] > 382 ? $black : $white);
-            }
-            else
-            {
+            } else {
                 $bBox = imagettfbbox($unit * 1.25, 0, $font, $text);
                 $width = ($bBox[2] - $bBox[0]) / 2;
                 $height = ($bBox[1] - $bBox[7]) / 2;
@@ -184,19 +174,17 @@ class Target
             }
         }
 
-        if($type == self::DRAW_TYPE_JPEG)
-        {
+        if ($type == self::DRAW_TYPE_JPEG) {
             return imagejpeg($image, $filename, $quality);
-        }
-        else if($type == self::DRAW_TYPE_GIF)
-        {
+        } elseif ($type == self::DRAW_TYPE_GIF) {
             return imagegif($image, $filename);
         }
+
         return imagepng($image, $filename, $quality, $filters);
     }
 
     /**
-     * Get the hits array
+     * Get the hits array.
      *
      * @return Hit[]
      */
@@ -206,7 +194,7 @@ class Target
     }
 
     /**
-     * Set the hits array
+     * Set the hits array.
      *
      * @param Hit[]|Hit $hits
      *
@@ -220,7 +208,7 @@ class Target
     }
 
     /**
-     * Add a hit
+     * Add a hit.
      *
      * @param Hit $hit
      *
@@ -228,8 +216,7 @@ class Target
      */
     public function addHit($hit)
     {
-        if(!in_array($hit, $this->hits))
-        {
+        if (!in_array($hit, $this->hits)) {
             $this->hits[] = $hit;
         }
 
@@ -237,35 +224,39 @@ class Target
     }
 
     /**
-     * Allocate hex color
+     * Allocate hex color.
      *
      * @param resource $im
-     * @param string $hex
+     * @param string   $hex
+     *
      * @return int
      */
     private function hexColorAllocate($im, $hex)
     {
         $rgb = $this->hexColorToRGB($hex);
+
         return imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
     }
 
     /**
-     * Convert hex color to RGB array
+     * Convert hex color to RGB array.
      *
      * @param string $hex
+     *
      * @return array
      */
     private function hexColorToRGB($hex)
     {
-        $hex = str_repeat(ltrim($hex,'#'), 6);
-        $a = hexdec(substr($hex,0,2));
-        $b = hexdec(substr($hex,2,2));
-        $c = hexdec(substr($hex,4,2));
+        $hex = str_repeat(ltrim($hex, '#'), 6);
+        $a = hexdec(substr($hex, 0, 2));
+        $b = hexdec(substr($hex, 2, 2));
+        $c = hexdec(substr($hex, 4, 2));
+
         return [
             $a,
             $b,
             $c,
-            $a + $b + $c
+            $a + $b + $c,
         ];
     }
 }
