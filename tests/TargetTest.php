@@ -4,13 +4,14 @@ use ShootingTarget\Hit;
 use ShootingTarget\Target;
 
 /**
- * Class TargetTest
+ * Class TargetTest.
+ *
  * @author Patrick Bußmann <patrick.bussmann@bussmann-it.de>
  */
 class TargetTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * Test the target itself
+     * Test the target itself.
      */
     public function testTargetConstruction()
     {
@@ -19,7 +20,7 @@ class TargetTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test if hits added as expected
+     * Test if hits added as expected.
      */
     public function testAddingHits()
     {

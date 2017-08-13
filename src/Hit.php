@@ -3,8 +3,8 @@
 namespace ShootingTarget;
 
 /**
- * Class Hit
- * @package ShootingTarget
+ * Class Hit.
+ *
  * @author Patrick Bußmann <patrick.bussmann@bussmann-it.de>
  */
 class Hit
@@ -32,8 +32,8 @@ class Hit
     /**
      * Hit constructor.
      *
-     * @param float $x
-     * @param float $y
+     * @param float       $x
+     * @param float       $y
      * @param null|string $label
      * @param null|string $color
      */
@@ -78,7 +78,7 @@ class Hit
     }
 
     /**
-     * Get the divider of the hit
+     * Get the divider of the hit.
      *
      * @param float $fromX defaults to the middle of the target: 0
      * @param float $fromY defaults to the middle of the target: 0
