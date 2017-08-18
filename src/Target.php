@@ -42,18 +42,24 @@ class Target
      * @var int the number of ring
      */
     private $ringCount;
-
-    /**
-     * Target constructor.
-     *
-     * @param float      $diameter10
-     * @param float|null $diameterInner10
-     * @param float      $ringSpacing
-     * @param int        $firstInnerRing
-     * @param int        $ringCount
-     * @param Hit[]      $hits
-     */
-    public function __construct($diameter10 = 0.5, $diameterInner10 = 0.5, $ringSpacing = 2.5, $firstInnerRing = 4, $ringCount = 10, $hits = [])
+	
+	/**
+	 * @var array some options like color settings
+	 */
+    private $options;
+	
+	/**
+	 * Target constructor.
+	 *
+	 * @param float $diameter10
+	 * @param float|null $diameterInner10
+	 * @param float $ringSpacing
+	 * @param int $firstInnerRing
+	 * @param int $ringCount
+	 * @param Hit[] $hits
+	 * @param array $options
+	 */
+    public function __construct($diameter10 = 0.5, $diameterInner10 = 0.5, $ringSpacing = 2.5, $firstInnerRing = 4, $ringCount = 10, $hits = [], $options = [])
     {
         $this->diameter10 = $diameter10;
         $this->diameterInner10 = $diameterInner10;
@@ -61,6 +67,7 @@ class Target
         $this->firstInnerRing = $firstInnerRing;
         $this->ringCount = $ringCount;
         $this->setHits($hits);
+        $this->setOptions($options);
     }
 
     /**
@@ -87,7 +94,7 @@ class Target
      */
     public function draw($unit = 20, $type = self::DRAW_TYPE_PNG, $font = 5, $filename = null, $quality = null, $filters = null)
     {
-        $size = (($this->diameter10 / 2) + (($this->ringCount - 1) * $this->ringSpacing)) * 2 * $unit;
+        $size = $this->getTargetSize() * $unit;
         $image = imagecreatetruecolor($size, $size);
 
         $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
@@ -98,18 +105,18 @@ class Target
         $white = imagecolorallocate($image, 255, 255, 255);
         $red = imagecolorallocate($image, 255, 0, 0);
 
-        /*
+        /**
          * Rings
          */
         for ($x = $this->ringCount - 1; $x >= 0; $x--) {
             $diameter = (($x * $this->ringSpacing * 2) + $this->diameter10) * $unit;
 
-            imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $x > ($this->ringCount - $this->firstInnerRing) ? $black : $white);
-            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 3, $diameter - 3, $x > ($this->ringCount - $this->firstInnerRing) ? $white : $black);
+            imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $x > ($this->ringCount - $this->firstInnerRing) ? $this->hexColorAllocate($image, $this->getOption('outer_ring_border_color')) : $this->hexColorAllocate($image, $this->getOption('inner_ring_border_color')));
+            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 3, $diameter - 3, $x > ($this->ringCount - $this->firstInnerRing) ? $this->hexColorAllocate($image, $this->getOption('outer_ring_color')) : $this->hexColorAllocate($image, $this->getOption('inner_ring_color')));
 
             if ($this->ringCount - $x < 9) {
                 $text = $this->ringCount - $x;
-                $color = $x > ($this->ringCount - $this->firstInnerRing) ? $black : $white;
+                $color = $x > ($this->ringCount - $this->firstInnerRing) ? $this->hexColorAllocate($image, $this->getOption('outer_ring_text_color')) : $this->hexColorAllocate($image, $this->getOption('inner_ring_text_color'));
 
                 if (is_numeric($font)) {
                     $width = (imagefontwidth($font) * strlen($text)) / 2;
@@ -144,20 +151,19 @@ class Target
          * Inner 10.
          */
         $diameter = ($this->diameterInner10 / 2) * 2 * $unit;
-        imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $white);
+        imagefilledellipse($image, $size / 2, $size / 2, $diameter, $diameter, $this->hexColorAllocate($image, $this->getOption('inner_ring_border_color')));
         if (($this->diameterInner10 / 2) * 2 >= 3) {
-            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 2, $diameter - 2, $black);
+            imagefilledellipse($image, $size / 2, $size / 2, $diameter - 2, $diameter - 2, $this->hexColorAllocate($image, $this->getOption('inner_ring_color')));
         }
 
         foreach ($this->hits as $number => $hit) {
             $x = $hit->getX() * 0.01 * $unit;
             $y = $hit->getY() * 0.01 * $unit;
             $text = $hit->getLabel() ?: ($number + 1);
-            $color = $hit->getColor() !== null ? $this->hexColorAllocate($image, $hit->getColor()) : $red;
-            $rgbColor = $this->hexColorToRGB($hit->getColor());
-            $borderColor = $white;
+            $color = $hit->getColor() !== null ? $this->hexColorAllocate($image, $hit->getColor()) : $this->hexColorAllocate($image, $this->getOption('hit_color'));
+            $rgbColor = $this->hexColorToRGB($color);
 
-            imagefilledellipse($image, $size / 2 + $x, $size / 2 - $y, 4.5 * $unit, 4.5 * $unit, $borderColor);
+            imagefilledellipse($image, $size / 2 + $x, $size / 2 - $y, 4.5 * $unit, 4.5 * $unit, $this->hexColorAllocate($image, $this->getOption('hit_border_color')));
             imagefilledellipse($image, $size / 2 + $x, $size / 2 - $y, 4.5 * $unit - 3, 4.5 * $unit - 3, $color);
 
             if (is_numeric($font)) {
@@ -181,6 +187,18 @@ class Target
         }
 
         return imagepng($image, $filename, $quality, $filters);
+    }
+	
+	/**
+	 * Get the target size in mm
+	 *
+	 * @param bool $asDiameter return the diameter if true else the whole size
+	 *
+	 * @return float
+	 */
+    public function getTargetSize($asDiameter = false)
+    {
+    	return (($this->diameter10 / 2) + (($this->ringCount - 1) * $this->ringSpacing)) * ($asDiameter ? 1 : 2);
     }
 
     /**
@@ -259,4 +277,52 @@ class Target
             $a + $b + $c,
         ];
     }
+	
+	/**
+	 * @return array
+	 */
+	public function getOptions()
+	{
+		return $this->options;
+	}
+	
+	/**
+	 * Get an option
+	 *
+	 * @param string $key the key to get
+	 * @param mixed $default the default value
+	 *
+	 * @return mixed if key exist then this or else the default value
+	 */
+	public function getOption($key, $default = null)
+	{
+		$key = strtolower($key);
+		return array_key_exists($key, $this->options) ? $this->options[$key] : $default;
+	}
+	
+	/**
+	 * @param array $options
+	 */
+	public function setOptions($options)
+	{
+		$this->options = array_merge($this->getDefaultOptions(), $options);
+	}
+	
+	/**
+	 * @return array default options
+	 */
+	private function getDefaultOptions()
+	{
+		return array(
+			'outer_ring_color' => '#fff',
+			'outer_ring_text_color' => '#000',
+			'outer_ring_border_color' => '#000',
+			'inner_ring_color' => '#000',
+			'inner_ring_text_color' => '#fff',
+			'inner_ring_border_color' => '#fff',
+			'ring_texts' => true,
+			'hit_color' => '#ff0000',
+			'hit_border_color' => '#fff'
+		);
+	}
 }
